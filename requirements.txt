@@ -1,0 +1,6 @@
+Flask
+Pillow
+Werkzeug
+ndi-python
+numpy
+PyYAML

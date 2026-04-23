@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send to Screen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Send to Screen</h1>
+            <p>Upload an image and add text to queue it for the live screen.</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form id="generator-form" action="/generate" method="post" enctype="multipart/form-data" class="upload-form">
+            
+            <div class="form-group">
+                <label for="image">Upload Image:</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" name="image" id="image" accept="image/*">
+                    <div class="preview-area" id="preview-area">
+                        <span id="preview-text">Choose an image or drag & drop</span>
+                        <img id="image-preview" src="#" alt="Preview" style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="text">Text (Bottom Caption):</label>
+                <input type="text" name="text" id="text" placeholder="Enter Thai or English text...">
+            </div>
+
+            <button type="submit" id="submit-btn" class="submit-btn">Send to Screen</button>
+            <div id="status-message" style="display: none; margin-top: 15px; padding: 10px; border-radius: 6px; text-align: center; font-weight: 500;"></div>
+        </form>
+
+        <div id="result-section" class="result-section" style="display: none; margin-top: 30px; text-align: center;">
+            <hr style="border: 1px solid #334155; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 15px; color: var(--text-primary);">Generated Image</h3>
+            <img id="result-image" src="#" alt="Generated Result" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <a id="download-link" href="#" download="generated_image.jpg" class="submit-btn" style="text-decoration: none; width: auto; padding: 10px 20px; font-size: 0.95rem;">Download Image</a>
+                <button type="button" onclick="window.location.reload();" class="submit-btn" style="background: linear-gradient(135deg, #444, #666); width: auto; padding: 10px 20px; font-size: 0.95rem;">Generate Another</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple script to preview image before upload
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewText = document.getElementById('preview-text');
+
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    previewText.style.display = 'none';
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                imagePreview.src = '#';
+                imagePreview.style.display = 'none';
+                previewText.style.display = 'block';
+            }
+        });
+
+        // AJAX Form Submission
+        const form = document.getElementById('generator-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultSection = document.getElementById('result-section');
+        const resultImage = document.getElementById('result-image');
+        const downloadLink = document.getElementById('download-link');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'Generating...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const statusMsg = document.getElementById('status-message');
+                    statusMsg.style.display = 'block';
+                    statusMsg.textContent = data.message;
+                    
+                    if (data.status === 'success') {
+                        statusMsg.style.backgroundColor = 'rgba(74, 222, 128, 0.2)';
+                        statusMsg.style.color = '#4ade80';
+                        statusMsg.style.border = '1px solid #4ade80';
+                        
+                        // Reset form
+                        form.reset();
+                        imagePreview.style.display = 'none';
+                        previewText.style.display = 'block';
+                    } else {
+                        statusMsg.style.backgroundColor = 'rgba(248, 113, 113, 0.2)';
+                        statusMsg.style.color = '#f87171';
+                        statusMsg.style.border = '1px solid #f87171';
+                    }
+                    
+                    setTimeout(() => {
+                        statusMsg.style.display = 'none';
+                    }, 5000);
+                } else {
+                    alert('Error sending to screen. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            } finally {
+                // Restore button state
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>

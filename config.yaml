@@ -1,0 +1,22 @@
+# --- Basic Configurations ---
+UPLOAD_FOLDER: 'uploads'
+OUTPUT_FOLDER: 'outputs'
+FONT_PATH: 'static/fonts/Kanit-Regular.ttf'
+
+# --- NDI Settings ---
+NDI_NAME: 'ImageGen_NDI'
+
+# --- Canvas & Image Settings ---
+CANVAS_WIDTH: 1920
+CANVAS_HEIGHT: 1080
+BACKGROUND_COLOR: [0, 0, 0]
+TEXT_COLOR: [255, 255, 255]
+BACKGROUND_IMAGE_PATH: 'background.jpg'
+
+# สัดส่วนภาพที่อัปโหลด (1.5 = ขยาย 1.5 เท่าของขนาดครึ่งจอ)
+IMAGE_SCALE_FACTOR: 1.5
+
+# --- Queue & Timing Settings ---
+MAX_QUEUE_SIZE: 30
+TIME_SHOW_IMAGE: 20.0       # เวลา (วินาที) ในการโชว์ภาพแต่ละภาพ
+TIME_GREEN_SCREEN: 10.0     # เวลา (วินาที) ในการคั่นด้วยหน้าจอเขียว (Green Screen)
